@@ -156,7 +156,7 @@ for (j in 1:nrow(grid_f)) {
   #+++++++++++++++++++++++
   toc()
   time <- toc()
-  write.table(data.frame(token = output_name, time =  hms::as.hms(time$toc -  time$tic), row.names = NULL), 
+  write.table(data.frame(token = output_name, time =  hms::as_hms(time$toc -  time$tic), row.names = NULL), 
               file = paste0("00data/rdata/02conventional_sl/",ml_model_path,"/time.csv"),
               sep = ";", append = T, col.names = F)
   #+++++++++++++++++++++++
