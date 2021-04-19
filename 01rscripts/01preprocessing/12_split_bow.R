@@ -25,7 +25,7 @@ tic("load data")
 #+++++++++++++++++++++++
 
 load("00data/rdata/01preprocessing/09_grid_sl.RData")
-f <- !paste0("ls_split_", grid_sl$data_id_config, ".RDS") %in% list.files(path = "00data/rdata/01preprocessing/12_split/")
+f <- !paste0("ls_split_", grid_sl$data_id_config, ".RDS") %in% list.files(path = "00data/rdata/01preprocessing/12_split_bow/")
 grid_sl <- grid_sl[f,]
 
 #+++++++++++++++++++++++

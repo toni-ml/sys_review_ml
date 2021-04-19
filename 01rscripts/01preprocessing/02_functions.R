@@ -505,13 +505,13 @@ store_split <- function(j) {
   # save split
   #*****************************************************************************
   
-  saveRDS(object = ls_split, file = paste0("00data/rdata/01preprocessing/12_split/ls_split_", grid_sl$data_id_config[j], ".RDS"))
+  saveRDS(object = ls_split, file = paste0("00data/rdata/01preprocessing/12_split_bow/ls_split_", grid_sl$data_id_config[j], ".RDS"))
   
   rm(ls_split)
   #*************************
   time <- toc(quiet = T)
   write.table(data.frame(token = time$msg, time =  hms::as.hms(time$toc -  time$tic), row.names = NULL), 
-              file = "00data/rdata/01preprocessing/12_split/time.csv",
+              file = "00data/rdata/01preprocessing/12_split_bow/time.csv",
               sep = ";", append = T, col.names = F)
   #*************************
 }
@@ -582,13 +582,13 @@ store_split_embedding <- function(j) {
   # save split
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
-  saveRDS(object = ls_split, file = paste0("00data/rdata/01preprocessing/14_split_embedding/ls_split_", grid_sl$data_id_config[j], ".RDS"))
+  saveRDS(object = ls_split, file = paste0("00data/rdata/01preprocessing/13_split_emb/ls_split_", grid_sl$data_id_config[j], ".RDS"))
   
   rm(ls_split)
   #*************************
   time <- toc(quiet = T)
   write.table(data.frame(token = time$msg, time =  hms::as.hms(time$toc -  time$tic), row.names = NULL), 
-              file = "00data/rdata/01preprocessing/14_split_embedding/time.csv",
+              file = "00data/rdata/01preprocessing/13_split_emb/time.csv",
               sep = ";", append = T, col.names = F)
   #*************************
 }

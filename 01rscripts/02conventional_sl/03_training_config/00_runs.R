@@ -54,7 +54,7 @@ for (j in 1:nrow(grid_f)) {
   tic("load data")
   #+++++++++++++++++++++++
   
-  ls_split <- readRDS(paste0("00data/rdata/01preprocessing/12_split/",input_name))
+  ls_split <- readRDS(paste0("00data/rdata/01preprocessing/12_split_bow/",input_name))
   
   #+++++++++++++++++++++++
   time_load <- toc() 
