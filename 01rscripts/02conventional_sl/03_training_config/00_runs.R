@@ -22,7 +22,7 @@ source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.
 ####################           runs              ###############################
 #*******************************************************************************
 
-sink(paste0("00data/rdata/02conventional_sl/", ml_model_path, "/", ml_model, "_runs.txt"), append = TRUE)
+sink(paste0(fd_data, ml_model_path, "/", ml_model, "_runs.txt"), append = TRUE)
 pb <- txtProgressBar(max = nrow(grid_f), style = 3, width = 100)
 sink()
 for (j in 1:nrow(grid_f)) {
@@ -35,7 +35,7 @@ for (j in 1:nrow(grid_f)) {
   #+++++++++++++++++++++++
   sink(
     paste0(
-      "00data/rdata/02conventional_sl/", ml_model_path, "/",
+      fd_data, ml_model_path, "/",
       ml_model, "_tuning_rev_", formatC(grid_f$rev_id_config[j],width = 2, flag = 0), ".txt"
     ), append = TRUE)
   
@@ -50,7 +50,15 @@ for (j in 1:nrow(grid_f)) {
   # load data
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
+  #+++++++++++++++++++++++
+  tic("load data")
+  #+++++++++++++++++++++++
+  
   ls_split <- readRDS(paste0("00data/rdata/01preprocessing/12_split/",input_name))
+  
+  #+++++++++++++++++++++++
+  time_load <- toc() 
+  #+++++++++++++++++++++++
   
   if(ml_model == "null_model"){
   # reduce size to speed up runs
@@ -151,16 +159,26 @@ for (j in 1:nrow(grid_f)) {
   tic("save data")
   #+++++++++++++++++++++++
   
-  saveRDS(ls_model, paste0("00data/rdata/02conventional_sl/",ml_model_path, "/",output_name))
+  saveRDS(ls_model, paste0(fd_data,ml_model_path, "/",output_name))
   
   #+++++++++++++++++++++++
-  toc()
-  time <- toc()
-  write.table(data.frame(token = output_name, time =  hms::as_hms(time$toc -  time$tic), row.names = NULL), 
-              file = paste0("00data/rdata/02conventional_sl/",ml_model_path,"/time.csv"),
-              sep = ";", append = T, col.names = F)
+  time_save <- toc()
+  time_run <- toc()
+  write.table(data.frame(token = output_name, 
+                         cores = tidy_cores(),
+                         time_run =  hms::as_hms(time_run$toc -  time_run$tic),
+                         time_load =  hms::as_hms(time_load$toc -  time_load$tic), 
+                         time_fit =  hms::as_hms(time_fit$toc -  time_fit$tic),
+                         time_pred_train =  hms::as_hms(time_pred_train$toc -  time_pred_train$tic),
+                         time_pred_test =  hms::as_hms(time_pred_test$toc -  time_pred_test$tic),
+                         time_save =  hms::as_hms(time_save$toc -  time_save$tic),
+                         row.names = NULL), 
+              file = paste0(fd_data, ml_model_path,"/time.csv"),
+              sep = ";", append = T, 
+              row.names = F,
+              col.names = !file.exists(paste0(fd_data, ml_model_path,"/time.csv")))
   #+++++++++++++++++++++++
-  
+
   #+++++++++++++++++++++++
   # sink I
   #+++++++++++++++++++++++
@@ -170,14 +188,14 @@ for (j in 1:nrow(grid_f)) {
   #+++++++++++++++++++++++
   # sink II
   #+++++++++++++++++++++++
-  sink(paste0("00data/rdata/02conventional_sl/", ml_model_path, "/", ml_model, "_runs.txt"), append = TRUE)
+  sink(paste0(fd_data, ml_model_path, "/", ml_model, "_runs.txt"), append = TRUE)
   setTxtProgressBar(pb, j)
   sink()
 }
 close(pb)
 
 #+++++++++++++++++++++++
-sink(paste0("00data/rdata/02conventional_sl/", ml_model_path, "/", ml_model, "_runs.txt"), append = TRUE)
+sink(paste0(fd_data, ml_model_path, "/", ml_model, "_runs.txt"), append = TRUE)
 cat(paste("\n"))
 toc()
 sink()

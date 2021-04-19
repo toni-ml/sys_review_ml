@@ -22,7 +22,7 @@ tic("total script")
 #*******************************************************************************
 ####################    script configuration    ################################
 #*******************************************************************************
-
+fd_data <- "00data/rdata/03deeplearning/00_wordembedding/"
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # choose parameter for grid
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -37,7 +37,7 @@ grid_f <- grid_sl %>% filter(sampling_runs_config == "df_data",
                              rev_id_config == 1)
 grid_f$input_config <- if_else(grid_f$input_config == "ti_pp_stop", "ti_pp_stem_stop", grid_f$input_config)
 grid_f$input_config <- if_else(grid_f$input_config == "tiab_pp_stop", "tiab_pp_stem_stop", grid_f$input_config)
-f <- !paste0("wordembedding_", grid_f$input_config, ".h5") %in% list.files(path = "00data/rdata/03deeplearning/03_wordembedding/")
+f <- !paste0("wordembedding_", grid_f$input_config, ".h5") %in% list.files(path = fd_data)
 grid_f <- grid_f[f,]
 
 #*******************************************************************************
@@ -52,7 +52,7 @@ for (j in 1:nrow(grid_f)) {
   #+++++++++++++++++++++++
   sink(
     paste0(
-      "00data/rdata/03deeplearning/03_wordembedding/time.txt"
+      fd_data, "time.txt"
     ), append = TRUE)
   
   #+++++++++++++++++++++++

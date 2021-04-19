@@ -161,6 +161,14 @@ store_eval_dat_null_modell <- function(i){
     
     optim_metric = as.character(ls_model$fit$metric),
     
+    cores = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(cores),
+    time_run = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_run),
+    time_load = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_load),
+    time_fit = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_fit),
+    time_pred_train = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_pred_train),
+    time_pred_test = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_pred_test),
+    time_save = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_save),
+
     #+++++++++++++++++++++++
     # results of resamples
     #+++++++++++++++++++++++
@@ -278,7 +286,7 @@ store_eval_dat <- function(i){
   #+++++++++++++++++++++++
   fit_name <- paste0(ml_model, "_", grid_f$data_id_config[i])
   fit_name_null <- paste0("null_model_", grid_f$data_id_config[i])
-  ls_model <- readRDS(paste0("00data/rdata/02conventional_sl/",ml_model_path, "/",fit_name, ".RDS"))
+  ls_model <- readRDS(paste0(fd_data,ml_model_path, "/",fit_name, ".RDS"))
   ls_model_null <- readRDS(paste0("00data/rdata/02conventional_sl/00_null_model/",fit_name_null, ".RDS"))
   
   # calc average of metrics over folds and calc brier_skill score
@@ -317,8 +325,16 @@ store_eval_dat <- function(i){
       best_tune = ls_model$fit$bestTune,
       
       tune_time = as.character(hms::as_hms(ls_model$fit$times$everything[[3]])),
-      pred_test_time = times[which(times$X2 == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")),"X3"] %>% pull(X3),
+
       optim_metric = as.character(ls_model$fit$metric),
+      
+      cores = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(cores),
+      time_run = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_run),
+      time_load = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_load),
+      time_fit = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_fit),
+      time_pred_train = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_pred_train),
+      time_pred_test = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_pred_test),
+      time_save = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_save),
       
       #+++++++++++++++++++++++
       # results of resamples

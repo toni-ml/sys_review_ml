@@ -11,7 +11,7 @@ tic("run")
 #*******************************************************************************
 ######################     Wordembedding    ####################################
 #*******************************************************************************
-
+fd_data <- "00data/rdata/03deeplearning/00_wordembedding/"
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # tokenizer
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -86,7 +86,7 @@ model <- keras_model(list(input_target, input_context), output)
 sink()
 sink(
   paste0(
-    "00data/rdata/03deeplearning/03_wordembedding/embedidng_architecture.txt"
+    fd_data, "embedidng_architecture.txt"
   ),
   append = TRUE
 )
@@ -101,7 +101,7 @@ sink()
 #+++++++++++++++++++++++
 sink(
   paste0(
-    "00data/rdata/03deeplearning/03_wordembedding/time.txt"
+    fd_data, "time.txt"
   ), append = TRUE)
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -142,7 +142,7 @@ toc()
 tic("Save model")
 #+++++++++++++++++++++++
 
-model %>% save_model_hdf5(paste0("00data/rdata/03deeplearning/03_wordembedding/wordembedding_",grid_f$input_config[j],".h5"))
+model %>% save_model_hdf5(paste0(fd_data, "wordembedding_",grid_f$input_config[j],".h5"))
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # save the model weights into embedding matrix
@@ -161,7 +161,7 @@ words <- words %>%
 
 row.names(embedding_matrix) <- c("UNK", words$word)
 
-saveRDS(embedding_matrix, paste0("00data/rdata/03deeplearning/03_wordembedding/wordembedding_matrix_",grid_f$input_config[j], ".RDS"))
+saveRDS(embedding_matrix, paste0(fd_data, "wordembedding_matrix_",grid_f$input_config[j], ".RDS"))
 
 #+++++++++++++++++++++++
 toc()

@@ -7,7 +7,7 @@
 # configure the model runs
 
 #*******************************************************************************
-
+fd_data <- "00data/rdata/02conventional_sl/"
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # model
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -37,7 +37,7 @@ tune_grid <- expand.grid(
 rev_id <- length(table(df_data$rev_id)) # or choose a selection rev_id <- 1:1
 input <- c("tiab") # filter 
 f <- !paste0(ml_model,"_", grid_sl$data_id_config, ".RDS") %in% 
-  list.files(path = paste0("00data/rdata/02conventional_sl/",ml_model_path,"/"))
+  list.files(path = paste0(fd_data,ml_model_path,"/"))
 grid_f <- grid_sl[f,]
 grid_f <- grid_f %>% filter(rev_id_config %in% rev_id & grid %in% input)
 if(debug == TRUE){

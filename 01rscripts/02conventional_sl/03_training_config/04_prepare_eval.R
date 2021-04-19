@@ -19,7 +19,7 @@ tic("total script: 04_prepare_eval.R")
 rev_id <- length(table(df_data$rev_id)) # or choose a selection rev_id <- 1:1
 input <- c("tiab") # filter 
 f <- paste0(ml_model,"_", grid_sl$data_id_config, ".RDS") %in% 
-  list.files(path = paste0("00data/rdata/02conventional_sl/",ml_model_path,"/"))
+  list.files(path = paste0(fd_data,ml_model_path,"/"))
 grid_f <- grid_sl[f,]
 grid_f <- grid_f %>% filter(rev_id_config %in% rev_id & grid %in% input)
 
@@ -27,11 +27,16 @@ grid_f <- grid_f %>% filter(rev_id_config %in% rev_id & grid %in% input)
 # Time
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-times <- read_delim(paste0("00data/rdata/02conventional_sl/",ml_model_path, "/time.csv"), 
-                    ";", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE, col_types = cols(
-                      X1 = col_integer(),
-                      X2 = col_character(),
-                      X3 = col_time(format = "")
+times <- read_delim(paste0(fd_data,ml_model_path, "/time.csv"), 
+                    ";", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE, col_types = cols(
+                      token = col_character(),
+                      cores = col_double(),
+                      time_run = col_time(format = ""),
+                      time_load = col_time(format = ""),
+                      time_fit = col_time(format = ""),
+                      time_pred_train = col_time(format = ""),
+                      time_pred_test = col_time(format = ""),
+                      time_save = col_time(format = "")
                     ))
 
 
