@@ -15,7 +15,8 @@ tic("total script: 01_runs.R")
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # source train control
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.R"))
+# source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.R"))
+source(paste0("01rscripts/03deeplearning/06_training_config/01_train_control.R"))
 
 
 #*******************************************************************************
@@ -54,18 +55,39 @@ for (j in 1:nrow(grid_f)) {
   tic("load data")
   #+++++++++++++++++++++++
   
-  ls_split <- readRDS(paste0("00data/rdata/01preprocessing/12_split_bow/",input_name))
-  
+  ls_split <- readRDS(paste0("00data/rdata/01preprocessing/12_split_bow/",input_name))  
   #+++++++++++++++++++++++
   time_load <- toc() 
   #+++++++++++++++++++++++
   
-  if(ml_model == "null_model"){
-  # reduce size to speed up runs
-  ls_split$data_dtm %<>% select(1:3) 
-  ls_split$train_dtm %<>% select(1:3) 
-  ls_split$test_dtm %<>% select(1:3) 
-  }
+  
+  if(str_detect(ml_model, "mlp|cnn")){
+
+    if(str_detect(string = grid_f$data_id_config[j], pattern = "tiab_tf_sl")){
+      model_wordembedding <- keras::load_model_hdf5("00data/rdata/03deeplearning/00_wordembedding/wordembedding_tiab_pp_lemma_stop.h5")
+      embedding_weights <- keras::get_weights(object = model_wordembedding)[[1]]
+      max_features <- dim(embedding_weights)[1]
+      embedding_dims <- dim(embedding_weights)[2]
+      pad_max_length <- ls_split$pad_max_length
+    }
+    
+    
+    if(str_detect(string = grid_f$data_id_config[j], pattern = "tiab_tf_ss")){
+      model_wordembedding <- keras::load_model_hdf5("00data/rdata/03deeplearning/00_wordembedding/wordembedding_tiab_pp_stem_stop.h5")
+      embedding_weights <- keras::get_weights(object = model_wordembedding)[[1]]
+      max_features <- dim(embedding_weights)[1]
+      embedding_dims <- dim(embedding_weights)[2]
+      pad_max_length <- ls_split$pad_max_length
+    }
+    
+  } 
+
+  # if(ml_model == "null_model"){
+  #   # reduce size to speed up runs
+  #   ls_split$data_dtm %<>% select(1:3) 
+  #   ls_split$train_dtm %<>% select(1:3) 
+  #   ls_split$test_dtm %<>% select(1:3) 
+  # }
   
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # dtm manipulation for correct test data dtm in case of downsampling and token reduction
@@ -92,37 +114,39 @@ for (j in 1:nrow(grid_f)) {
     }
   }  
   
-  if(ml_model == "c50"){
-  # necessary step, because C5.0 does not handle "outcome" as columnname
-  names(ls_split$train_dtm)[names(ls_split$train_dtm) == "outcome"] <- "outcomes"
-  names(ls_split$test_dtm)[names(ls_split$test_dtm) == "outcome"] <- "outcomes"
-  names(ls_split$data_dtm)[names(ls_split$data_dtm) == "outcome"] <- "outcomes"
-  }
+
+  
+  # if(ml_model == "c50"){
+  #   # necessary step, because C5.0 does not handle "outcome" as columnname
+  #   names(ls_split$train_dtm)[names(ls_split$train_dtm) == "outcome"] <- "outcomes"
+  #   names(ls_split$test_dtm)[names(ls_split$test_dtm) == "outcome"] <- "outcomes"
+  #   names(ls_split$data_dtm)[names(ls_split$data_dtm) == "outcome"] <- "outcomes"
+  # }
   
   
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # dtm specific tuning parameter
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  if(ml_model == "rf"){
-  # 5% mtry - Update mtry_default for Random Forest
-  mtry_default <- floor(sqrt(ncol(ls_split$train_dtm))) - 1
-  tune_grid <- expand.grid(
-    mtry = c(mtry_default: (mtry_default + floor(mtry_default *0.05))),
-    splitrule = c("gini", "extratrees"),
-    min.node.size = c(1, 3, 5)
-  )
-  source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.R"))
-  }
-  
-  if(ml_model == "avNNet"){
-  max_size <- max(tune_grid$size)
-  max_features <- ncol(select(
-    ls_split$train_dtm,
-    -c("pub_id")
-  ))
-  num_weights <- (max_size * max_features + 1) + max_size + 1
-  source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.R"))
-  }
+  # if(ml_model == "rf"){
+  #   # 5% mtry - Update mtry_default for Random Forest
+  #   mtry_default <- floor(sqrt(ncol(ls_split$train_dtm))) - 1
+  #   tune_grid <- expand.grid(
+  #     mtry = c(mtry_default: (mtry_default + floor(mtry_default *0.05))),
+  #     splitrule = c("gini", "extratrees"),
+  #     min.node.size = c(1, 3, 5)
+  #   )
+  #   source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.R"))
+  # }
+  # 
+  # if(ml_model == "avNNet"){
+  #   max_size <- max(tune_grid$size)
+  #   max_features <- ncol(select(
+  #     ls_split$train_dtm,
+  #     -c("pub_id")
+  #   ))
+  #   num_weights <- (max_size * max_features + 1) + max_size + 1
+  #   source(paste0("01rscripts/02conventional_sl/03_training_config/01_train_control.R"))
+  # }
   
   
   
@@ -144,12 +168,14 @@ for (j in 1:nrow(grid_f)) {
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # source model training
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  source(paste0("01rscripts/02conventional_sl/03_training_config/02_training.R"))
+  # source(paste0("01rscripts/02conventional_sl/03_training_config/02_training.R"))
+  source(paste0("01rscripts/03deeplearning/06_training_config/02_training.R"))
   
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # source model prediction
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  source(paste0("01rscripts/02conventional_sl/03_training_config/03_prediction.R"))
+  # source(paste0("01rscripts/02conventional_sl/03_training_config/03_prediction.R"))
+  source(paste0("01rscripts/03deeplearning/06_training_config/03_prediction.R"))
   
   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # save model run
@@ -159,7 +185,7 @@ for (j in 1:nrow(grid_f)) {
   tic("save data")
   #+++++++++++++++++++++++
   
-  saveRDS(ls_model, paste0(fd_data,ml_model_path, "/",output_name))
+  saveRDS(ls_model, paste0(fd_data, ml_model_path, "/",output_name))
   
   #+++++++++++++++++++++++
   time_save <- toc()
@@ -178,7 +204,7 @@ for (j in 1:nrow(grid_f)) {
               row.names = F,
               col.names = !file.exists(paste0(fd_data, ml_model_path,"/time.csv")))
   #+++++++++++++++++++++++
-
+  
   #+++++++++++++++++++++++
   # sink I
   #+++++++++++++++++++++++

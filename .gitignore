@@ -42,3 +42,31 @@ vignettes/*.pdf
 README_example.md
 
 
+
+# ignore RDS, csv, txt and RData in 00data
+00data/rdata/01preprocessing/**/*.RDS
+00data/rdata/01preprocessing/**/*.csv
+00data/rdata/01preprocessing/**/*.txt
+00data/rdata/01preprocessing/**/*.RData
+
+00data/rdata/02conventional_sl/**/*.RDS
+00data/rdata/02conventional_sl/**/*.txt
+00data/rdata/02conventional_sl/**/*.csv
+
+00data/rdata/03deeplearning/**/*.RDS
+00data/rdata/03deeplearning/**/*.txt
+00data/rdata/03deeplearning/**/*.csv
+00data/rdata/03deeplearning/**/*.h5
+
+# ignore RDS in outputs
+02outputs/02conventional_sl/00_null_model/*.RDS
+02outputs/02conventional_sl/01_logreg/*.RDS
+02outputs/02conventional_sl/02_c50/*.RDS
+02outputs/02conventional_sl/03_rf/*.RDS
+02outputs/02conventional_sl/04_svm/*.RDS
+02outputs/02conventional_sl/05_nb/*.RDS
+02outputs/02conventional_sl/06_knn/*.RDS
+02outputs/03deeplearning/01_mlp_bow/*.RDS
+02outputs/03deeplearning/02_mlp_emb/*.RDS
+02outputs/03deeplearning/03_cnn_only/*.RDS
+02outputs/03deeplearning/04_cnn_2mlp/*.RDS

@@ -293,3 +293,188 @@ specificity <- custom_metric("specificity", function(y_true, y_pred) {
 #   
 # }
 
+#***************************************************************************************************************************************************************
+#**********************         store_eval_dat         #*******************************************************************************************************
+#***************************************************************************************************************************************************************
+
+
+store_eval_dat <- function(i){
+  #+++++++++++++++++++++++
+  # load data
+  #+++++++++++++++++++++++
+  fit_name <- paste0(ml_model, "_", grid_f$data_id_config[i])
+  fit_name_null <- paste0("null_model_", grid_f$data_id_config[i])
+  ls_model <- readRDS(paste0(fd_data, ml_model_path, "/",fit_name, ".RDS"))
+  ls_model_null <- readRDS(paste0("00data/rdata/02conventional_sl/00_null_model/",fit_name_null, ".RDS"))
+  
+  # calc average of metrics over folds and calc brier_skill score
+  results_temp <- ls_model$fit$resample %>%  
+    left_join(
+      ls_model_null$fit$resample %>% 
+        select(Resample, brier_score_ref = brier_score),
+      by = "Resample") %>% 
+    mutate(brier_skill_score = (brier_score_ref - brier_score)/brier_score_ref,
+           brier_comp_score = brier_score_ref - brier_score,
+           net_benefit05 = (sens - (1 - spec)*(0.05/(1-0.05))),
+           net_benefit10 = (sens - (1 - spec)*(0.05/(1-0.1))))
+  
+  
+  lvls <- levels(ls_model$test_y_ref)
+  
+  #+++++++++++++++++++++++
+  # overall
+  #+++++++++++++++++++++++
+  ls_temp_return <- 
+    list(
+      dat_id = as.character(grid_f$data_id_config[i]),
+      rev_id = as.character(grid_f$rev_id_config[i]),
+      sampling = as.character(grid_f$sampling_runs_names_config[i]),
+      ti_tiab = as.character(grid_f$input_names1_config[i]),
+      stem_lemma = as.character(if_else(grid_f$input_names2_config[i] == "ss", "stem", "lemma")),
+      weight = as.character(grid_f$weight_tf_tf_idf_names_config[i]),
+      ngram = as.character(grid_f$ngram_config[i]),
+      max_tokens = as.numeric(grid_f$max_init_tokens_config[i]),
+      max_tokens_names = as.character(grid_f$max_init_tokens_names_config[i]),
+      
+      model_short = as.character(ml_model),
+      model_type = as.character(ls_model$fit$modelType),
+      model_method = as.character(ls_model$fit$method),
+      
+      best_tune = ls_model$fit$bestTune,
+      
+      tune_time = as.character(hms::as_hms(ls_model$fit$times$everything[[3]])),
+      
+      optim_metric = as.character(ls_model$fit$metric),
+      
+      cores = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(cores),
+      time_run = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_run),
+      time_load = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_load),
+      time_fit = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_fit),
+      time_pred_train = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_pred_train),
+      time_pred_test = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_pred_test),
+      time_save = times %>% filter(token == paste0(ml_model,"_",grid_f$data_id_config[i], ".RDS")) %>% pull(time_save),
+      
+      #+++++++++++++++++++++++
+      # results of resamples
+      #+++++++++++++++++++++++
+      kcross_brier_score = as.numeric(mean(results_temp$brier_score)),
+      kcross_brier_score_sd = as.numeric(sd(results_temp$brier_score)),
+      kcross_brier_score_ref = as.numeric(mean(results_temp$brier_score_ref)),
+      kcross_brier_score_ref_sd = as.numeric(sd(results_temp$brier_score_ref)),
+      kcross_brier_skill_score = as.numeric(mean(results_temp$brier_skill_score)),
+      kcross_brier_skill_score_sd = as.numeric(sd(results_temp$brier_skill_score)),
+      kcross_brier_comp_score = as.numeric(mean(results_temp$brier_comp_score)),
+      kcross_brier_comp_score_sd = as.numeric(sd(results_temp$brier_comp_score)),
+      
+      kcross_net_benefit05 = as.numeric(mean(results_temp$net_benefit05)),
+      kcross_net_benefit05_sd = as.numeric(sd(results_temp$net_benefit05)),
+      kcross_net_benefit10 = as.numeric(mean(results_temp$net_benefit10)),
+      kcross_net_benefit10_sd = as.numeric(sd(results_temp$net_benefit10)),
+      
+      kcross_acc = as.numeric(mean(results_temp$acc)),
+      kcross_acc_sd = as.numeric(sd(results_temp$acc)),
+      kcross_auc = as.numeric(mean(results_temp$auc)),
+      kcross_auc_sd = as.numeric(sd(results_temp$auc)),
+      kcross_sens = as.numeric(mean(results_temp$sens)),
+      kcross_sens_sd = as.numeric(sd(results_temp$sens)),
+      kcross_spec = as.numeric(mean(results_temp$spec)),
+      kcross_spec_sd = as.numeric(sd(results_temp$spec)),
+      
+      kcross_pos_pred = as.numeric(mean(results_temp$pos_pred)),
+      kcross_pos_pred_sd = as.numeric(sd(results_temp$pos_pred)),
+      kcross_neg_pred = as.numeric(mean(results_temp$neg_pred)),
+      kcross_neg_pred_sd = as.numeric(sd(results_temp$neg_pred)),
+      kcross_cl_error = as.numeric(mean(results_temp$cl_error)),
+      kcross_cl_error_sd = as.numeric(sd(results_temp$cl_error)),
+      kcross_f1 = as.numeric(mean(results_temp$f1)),
+      kcross_f1_sd = as.numeric(sd(results_temp$f1)),
+      kcross_entropy = as.numeric(mean(results_temp$entropy)),
+      kcross_entropy_sd = as.numeric(sd(results_temp$entropy)),
+      kcross_gini = as.numeric(mean(results_temp$gini)),
+      kcross_gini_sd = as.numeric(sd(results_temp$gini)),
+      
+      #+++++++++++++++++++++++
+      # train_cm
+      #+++++++++++++++++++++++
+      train_brier_score = as.numeric(mean((ls_model$train_pred_prob[["inclusion"]] - ifelse(ls_model$train_y_ref == lvls[2], 0, 1))^2)),
+      train_brier_score_ref = as.numeric(mean((ls_model_null$train_pred_prob[["inclusion"]] - ifelse(ls_model_null$train_y_ref == lvls[2], 0, 1))^2)),
+      train_brier_skill_score = as.numeric(1 - mean((ls_model$train_pred_prob[["inclusion"]] - ifelse(ls_model$train_y_ref == lvls[2], 0, 1))^2)/mean((ls_model_null$train_pred_prob[["inclusion"]] - ifelse(ls_model_null$train_y_ref == lvls[2], 0, 1))^2)),
+      train_brier_comp_score = as.numeric(mean((ls_model_null$train_pred_prob[["inclusion"]] - ifelse(ls_model_null$train_y_ref == lvls[2], 0, 1))^2) - mean((ls_model$train_pred_prob[["inclusion"]] - ifelse(ls_model$train_y_ref == lvls[2], 0, 1))^2)),
+      train_auc =  as.numeric(ModelMetrics::auc(actual = ifelse(ls_model$train_y_ref == lvls[2], 0, 1), predicted = ls_model$train_pred_prob[, lvls[1]])),
+      train_cl_error = as.numeric(ModelMetrics::ce(actual = ifelse(ls_model$train_y_ref == lvls[2], 0, 1), predicted = ls_model$train_pred_prob[, "inclusion"])),
+      train_entropy = as.numeric(ModelMetrics::logLoss(actual = ifelse(ls_model$train_y_ref == lvls[2], 0, 1), predicted = ls_model$train_pred_prob[, "inclusion"])),
+      train_gini = as.numeric(MLmetrics::Gini(y_pred = ls_model$train_pred_prob[, lvls[1]], y_true = ifelse(ls_model$train_y_ref == lvls[1], 1, 0))),
+      train_cm_ref_incl_pred_incl = as.numeric(ls_model$train_cm$tabl[[1]]),
+      train_cm_ref_incl_pred_excl = as.numeric(ls_model$train_cm$tabl[[2]]),
+      train_cm_ref_excl_pred_incl = as.numeric(ls_model$train_cm$tabl[[3]]),
+      train_cm_ref_excl_pred_excl = as.numeric(ls_model$train_cm$tabl[[4]]),
+      train_accuracy = as.numeric(ls_model$train_cm$overall[[1]]),
+      train_kappa = as.numeric(ls_model$train_cm$overall[[2]]),
+      train_accuracy_lower = as.numeric(ls_model$train_cm$overall[[3]]),
+      train_accuracy_upper = as.numeric(ls_model$train_cm$overall[[4]]),
+      train_no_information_rate = as.numeric(ls_model$train_cm$overall[[5]]),
+      train_accuracy_pvalue = as.numeric(ls_model$train_cm$overall[[6]]),
+      train_mcnemar_pvalue = as.numeric(ls_model$train_cm$overall[[7]]),
+      train_sens = as.numeric(ls_model$train_cm$byClass[[1]]),
+      train_spec = as.numeric(ls_model$train_cm$byClass[[2]]),
+      
+      train_net_benefit05 = as.numeric(ls_model$train_cm$byClass[[1]] - ((1-ls_model$train_cm$byClass[[2]])*(0.05/(1-0.05)))),
+      train_net_benefit10 = as.numeric(ls_model$train_cm$byClass[[1]] - ((1-ls_model$train_cm$byClass[[2]])*(0.1/(1-0.1)))),
+      
+      train_pos_pred_val = as.numeric(ls_model$train_cm$byClass[[3]]),
+      train_neg_pred_val = as.numeric(ls_model$train_cm$byClass[[4]]),
+      train_precision = as.numeric(ls_model$train_cm$byClass[[5]]),
+      train_recall = as.numeric(ls_model$train_cm$byClass[[6]]),
+      train_f1 = as.numeric(ls_model$train_cm$byClass[[7]]),
+      train_prevalence = as.numeric(ls_model$train_cm$byClass[[8]]),
+      train_detect_rate = as.numeric(ls_model$train_cm$byClass[[9]]),
+      train_detect_prev = as.numeric(ls_model$train_cm$byClass[[10]]),
+      train_balanced_acc = as.numeric(ls_model$train_cm$byClass[[11]]),
+      
+      #+++++++++++++++++++++++
+      # test_cm
+      #+++++++++++++++++++++++
+      test_brier_score = as.numeric(mean((ls_model$test_pred_prob[["inclusion"]] - ifelse(ls_model$test_y_ref == lvls[2], 0, 1))^2)),
+      test_brier_score_ref = as.numeric(mean((ls_model_null$test_pred_prob[["inclusion"]] - ifelse(ls_model_null$test_y_ref == lvls[2], 0, 1))^2)),
+      test_brier_skill_score = as.numeric(1 - mean((ls_model$test_pred_prob[["inclusion"]] - ifelse(ls_model$test_y_ref == lvls[2], 0, 1))^2)/mean((ls_model_null$test_pred_prob[["inclusion"]] - ifelse(ls_model_null$test_y_ref == lvls[2], 0, 1))^2)),
+      test_brier_comp_score = as.numeric(mean((ls_model_null$test_pred_prob[["inclusion"]] - ifelse(ls_model_null$test_y_ref == lvls[2], 0, 1))^2) - mean((ls_model$test_pred_prob[["inclusion"]] - ifelse(ls_model$test_y_ref == lvls[2], 0, 1))^2)),
+      test_auc = as.numeric(ModelMetrics::auc(actual = ifelse(ls_model$test_y_ref == lvls[2], 0, 1), predicted = ls_model$test_pred_prob[, lvls[1]])),
+      test_cl_error = as.numeric(ModelMetrics::ce(actual = ifelse(ls_model$test_y_ref == lvls[2], 0, 1), predicted = ls_model$test_pred_prob[, "inclusion"])),
+      test_entropy = as.numeric(ModelMetrics::logLoss(actual = ifelse(ls_model$test_y_ref == lvls[2], 0, 1), predicted = ls_model$test_pred_prob[, "inclusion"])),
+      test_gini = as.numeric(MLmetrics::Gini(y_pred = ls_model$test_pred_prob[, lvls[1]], y_true = ifelse(ls_model$test_y_ref == lvls[1], 1, 0))),
+      test_cm_ref_incl_pred_incl = as.numeric(ls_model$test_cm$tabl[[1]]),
+      test_cm_ref_incl_pred_excl = as.numeric(ls_model$test_cm$tabl[[2]]),
+      test_cm_ref_excl_pred_incl = as.numeric(ls_model$test_cm$tabl[[3]]),
+      test_cm_ref_excl_pred_excl = as.numeric(ls_model$test_cm$tabl[[4]]),
+      test_accuracy = as.numeric(ls_model$test_cm$overall[[1]]),
+      test_kappa = as.numeric(ls_model$test_cm$overall[[2]]),
+      test_accuracy_lower = as.numeric(ls_model$test_cm$overall[[3]]),
+      test_accuracy_upper = as.numeric(ls_model$test_cm$overall[[4]]),
+      test_no_information_rate = as.numeric(ls_model$test_cm$overall[[5]]),
+      test_accuracy_pvalue = as.numeric(ls_model$test_cm$overall[[6]]),
+      test_mcnemar_pvalue = as.numeric(ls_model$test_cm$overall[[7]]),
+      test_sens = as.numeric(ls_model$test_cm$byClass[[1]]),
+      test_spec = as.numeric(ls_model$test_cm$byClass[[2]]),
+      
+      test_net_benefit05 = as.numeric(ls_model$test_cm$byClass[[1]] - ((1-ls_model$test_cm$byClass[[2]])*(0.05/(1-0.05)))),
+      est_net_benefit10 = as.numeric(ls_model$test_cm$byClass[[1]] - ((1-ls_model$test_cm$byClass[[2]])*(0.1/(1-0.1)))),
+      
+      test_pos_pred_val = as.numeric(ls_model$test_cm$byClass[[3]]),
+      test_neg_pred_val = as.numeric(ls_model$test_cm$byClass[[4]]),
+      test_precision = as.numeric(ls_model$test_cm$byClass[[5]]),
+      test_recall = as.numeric(ls_model$test_cm$byClass[[6]]),
+      test_f1 = as.numeric(ls_model$test_cm$byClass[[7]]),
+      test_prevalence = as.numeric(ls_model$test_cm$byClass[[8]]),
+      test_detect_rate = as.numeric(ls_model$test_cm$byClass[[9]]),
+      test_detect_prev = as.numeric(ls_model$test_cm$byClass[[10]]),
+      test_balanced_acc = as.numeric(ls_model$test_cm$byClass[[11]])
+      
+    ) %>% as.data.frame()
+  names(ls_temp_return) <- str_replace_all(names(ls_temp_return), pattern = "tune.", replacement = "tune_")
+  
+  return(ls_temp_return)
+}
+
+
+
+

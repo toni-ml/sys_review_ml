@@ -48,37 +48,22 @@ source(paste(fd,"02functions.R", sep = ""))
 # word embedding
 #*******************************************************************************
 
-source(paste(fd,"03_wordembedding/00_wordembedding_runs.R", sep = ""))
+# source(paste(fd,"03_wordembedding/00_wordembedding_runs.R", sep = ""))
 
 #*******************************************************************************
-# preparation
+# input data preparation
 #*******************************************************************************
 
-# source(paste(fd,"04_pad_seq_ftunes.R", sep = ""))
-# source(paste(fd,"04_pad_seq_caret.R", sep = ""))
+# source(paste(fd,"04_pad_seq/04_pad_seq_bow.R", sep = "")) # use for caret 
+# source(paste(fd,"04_pad_seq/04_pad_seq_emb.R", sep = "")) # use for ftunes
 
 #*******************************************************************************
 # DNN
 #*******************************************************************************
-# user <- 2
-# source(paste(fd,"06_dnn/02_mlp_caret/00_dl_dnn_ml_info.R", sep = ""))
-# source(paste(fd,"06_dnn/02_mlp_caret/00_dl_dnn_runs.R", sep = ""))
-# source(paste(fd,"06_dnn/02_mlp_caret/06_dl_dnn_prep_eval.R", sep = ""))
 
-#*******************************************************************************
-# CNN
-#*******************************************************************************
-user <- 1
-# source(paste(fd,"05_cnn/02_cnn_caret/000_infos/000_dl_cnn_2mlp_info.R", sep = ""))
-# source(paste(fd,"05_cnn/02_cnn_caret/000_infos/000_dl_mlp_info.R", sep = ""))
-# source(paste(fd,"05_cnn/02_cnn_caret/000_infos/000_dl_cnn_lstm_info.R", sep = ""))
-source(paste(fd,"05_cnn/02_cnn_caret/000_infos/000_dl_cnn_lstm_new_info.R", sep = ""))
-# source(paste(fd,"05_cnn/02_cnn_caret/000_infos/000_dl_cnn_single_info.R", sep = ""))
-# source(paste(fd,"05_cnn/02_cnn_caret/00_dl_runs.R", sep = ""))
-# source(paste(fd,"05_cnn/02_cnn_caret/06_dl_prep_eval.R", sep = ""))
+source(paste(fd, "07_model_config/01_config_mlp_bow.R", sep = ""))
+source(paste(fd, "07_model_config/02_config_mlp_emb.R", sep = ""))
+source(paste(fd, "07_model_config/03_config_cnn_only.R", sep = ""))
+source(paste(fd, "07_model_config/04_config_cnn_2mlp.R", sep = ""))
 
-source(paste(fd,"05_cnn/02_cnn_caret/000_pretest/02_model_fit_cnn_lstm.R", sep = ""))
 
-#*******************************************************************************
-# RNN
-#*******************************************************************************
