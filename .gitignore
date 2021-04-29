@@ -58,15 +58,14 @@ README_example.md
 00data/rdata/03deeplearning/**/*.csv
 00data/rdata/03deeplearning/**/*.h5
 
+00data/rdata/04ensemble/**/*.RDS
+00data/rdata/04ensemble/**/*.txt
+00data/rdata/04ensemble/**/*.csv
+
+
+
 # ignore RDS in outputs
-02outputs/02conventional_sl/00_null_model/*.RDS
-02outputs/02conventional_sl/01_logreg/*.RDS
-02outputs/02conventional_sl/02_c50/*.RDS
-02outputs/02conventional_sl/03_rf/*.RDS
-02outputs/02conventional_sl/04_svm/*.RDS
-02outputs/02conventional_sl/05_nb/*.RDS
-02outputs/02conventional_sl/06_knn/*.RDS
-02outputs/03deeplearning/01_mlp_bow/*.RDS
-02outputs/03deeplearning/02_mlp_emb/*.RDS
-02outputs/03deeplearning/03_cnn_only/*.RDS
-02outputs/03deeplearning/04_cnn_2mlp/*.RDS
+02outputs/02conventional_sl/**/*.RDS
+02outputs/03deeplearning/**/*.RDS
+02outputs/04ensemble/**/*.RDS
+
